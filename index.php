@@ -1,3 +1,18 @@
+<?php
+$servername = "localhost";
+$username = "root";
+$password = "";
+$dbname = "pokedex";
+
+// Crea la conexión
+$conn = new  mysqli($servername, $username, $password, $dbname);
+
+// Verifica la conexión
+if ($conn->connect_error) {
+  die("La conexión falló: " . $conn->connect_error);
+}
+echo "Conexión exitosa";
+?>
 
 <form method="post" action="index.php">
   <input type="text" name="search" placeholder="Buscar...">
