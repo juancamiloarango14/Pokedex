@@ -4,20 +4,28 @@ include("template/cabecera.php");
 
 <?php
 
- if (isset($_POST['submit'])) {
-    $id = $_POST['id'];
-    $name = $_POST['name'];
-    $type = $_POST['type'];
-    $image_url = $_POST['image_url'];
-  
-    $sql = "INSERT INTO pokemon (name, type, image_url, created_at, updated_at) VALUES (:name, :type, :image_url, NOW(), NOW())";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute(['name' => $name, 'type' => $type, 'description' => $description, 'image_url' => $image_url]);
-  }
+$txtID=(isset($_POST['txtID']))?$_POST['txtID']:"";
+$txtNombre=(isset($_POST['txtNombre']))?$_POST['txtNombre']:"";
+$txtTipo=(isset($_POST['txtTipo']))?$_POST['txtTipo']:"";
+$txtImagen=(isset($_FILES['txtImagen']['name']))?$_FILES['txtImagen']['name']:"";
 
-  
+  $accion=(isset($_POST['accion']))?$_POST['accion']:"";
+  $accion."<br/>";  
   include("config/bd.php");
-  
+
+switch($accion)
+{
+    case "Agregar":
+        $sentenciaSQL=$conexion->prepare("INSERT INTO pokemon(id,nombre,tipo,imagen) VALUES (NULL, 'Bulbasaur', 'planta', 'bulbasaur.jpg');");
+        $sentenciaSQL->execute();
+
+    break;
+
+
+}
+$sentenciaSQL=$conexion->prepare("SELECT * FROM pokemon");
+$sentenciaSQL->execute();
+$listapokemon=$sentenciaSQL->fetchAll(PDO::FETCH_ASSOC); 
 
 ?>
 
@@ -78,25 +86,22 @@ include("template/cabecera.php");
 </thead>
 
 <tbody>
+<?php foreach ($listapokemon as $pokemon) { ?>
 
-        <tr>  
+    <tr>  
+            <td><?php echo $pokemon['id']; ?></td>
+            <td><?php echo $pokemon['nombre']; ?></td>
+            <td><?php echo $pokemon['tipo']; ?></td>
+            <td><?php echo $pokemon['imagen']; ?></td>
 
+            <td>
+                <form method="post">
 
-            <td>                
+                <input type="hidden" name="txtID" id="" value="<?php echo $libro['id'];?>" />
 
-            <img class="img-thumbnail rounded" src=" " width="50" alt="" srcset="">
-        
-           </td>
+                <input type="submit" name="accion" value="Seleccionar" class="btn btn-primary"/>
 
-            <td> 
-            <form method="POST">
-
-            <input type="hidden" name="txtID" id="" value="<?php echo $pokemon['id'];?>" />
-
-            <input type="submit" name="accion" value="Seleccionar" class="btn btn-primary"/>
-
-            <input type="submit" name="accion" value="Borrar" class="btn btn-danger"/>
-
+                <input type="submit" name="accion" value="Borrar" class="btn btn-danger"/>
 
                 </form>
             
@@ -104,8 +109,8 @@ include("template/cabecera.php");
 
 
         </tr>
- 
-    </tbody>
+        <?php }?>
+  </tbody>
 </table>
 
 
