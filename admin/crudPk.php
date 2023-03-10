@@ -5,6 +5,7 @@ include("template/cabecera.php");
 <?php
 
 $txtID=(isset($_POST['txtID']))?$_POST['txtID']:"";
+$txtNPokedex=(isset($_POST['txtNPokedex']))?$_POST['txtNPokedex']:"";
 $txtNombre=(isset($_POST['txtNombre']))?$_POST['txtNombre']:"";
 $txtTipo=(isset($_POST['txtTipo']))?$_POST['txtTipo']:"";
 $txtImagen=(isset($_FILES['txtImagen']['name']))?$_FILES['txtImagen']['name']:"";
@@ -16,7 +17,8 @@ $txtImagen=(isset($_FILES['txtImagen']['name']))?$_FILES['txtImagen']['name']:""
 switch($accion)
 {
     case "Agregar":
-        $sentenciaSQL= $conexion->prepare("INSERT INTO pokemon (nombre, tipo, imagen) VALUES (:nombre,:tipo,:imagen);");
+        $sentenciaSQL= $conexion->prepare("INSERT INTO pokemon (npokedex, nombre, tipo, imagen) VALUES (:npokedex, :nombre,:tipo,:imagen);");
+        $sentenciaSQL->bindParam(':npokedex', $txtNPokedex);
         $sentenciaSQL->bindParam(':nombre', $txtNombre);
         $sentenciaSQL->bindParam(':tipo', $txtTipo);
         //$sentenciaSQL->bindParam(':imagen', $txtImagen);    
@@ -40,7 +42,8 @@ switch($accion)
 
     case"Modificar":
     
-        $sentenciaSQL=$conexion->prepare("UPDATE pokemon SET nombre=:nombre, tipo=:tipo WHERE id=:id");   
+        $sentenciaSQL=$conexion->prepare("UPDATE pokemon SET npokedex=:npokedex, nombre=:nombre, tipo=:tipo WHERE id=:id");
+        $sentenciaSQL->bindParam(':npokedex', $txtNPokedex);   
         $sentenciaSQL->bindParam(':nombre',$txtNombre);
         $sentenciaSQL->bindParam(':tipo',$txtTipo);
         $sentenciaSQL->bindParam(':id',$txtID);
@@ -88,6 +91,7 @@ switch($accion)
         $sentenciaSQL->execute();  
         $pokemon=$sentenciaSQL->fetch(PDO::FETCH_LAZY); 
 
+        $txtNPokedex=$pokemon ['npokedex'];
         $txtNombre=$pokemon ['nombre'];
         $txtTipo=$pokemon ['tipo'];
         $txtImagen=$pokemon ['imagen'];
@@ -119,30 +123,44 @@ $listapokemon=$sentenciaSQL->fetchAll(PDO::FETCH_ASSOC);
 <div class="card-body">
 <form method="POST" enctype="multipart/form-data">
 
-<div class = "form-group">
+<!-- <div class = "form-group">
 <label for="ID">ID:</label>
 <input type="text" required readonly class="form-control" value="<?php echo $txtID?>" name="txtID" id="txtID"  placeholder="ID">
+</div> -->
+
+<div class = "form-group">
+<label for="Nombre">Numero en la pokedex:</label>
+<input type="text" required class="form-control" value="<?php echo $txtNPokedex?>"  name="txtNPokedex" id="txtNPokedex"  placeholder="Numero en la Pokedex">
 </div>
 
 <div class = "form-group">
 <label for="Nombre">Nombre del Pokemon:</label>
-<input type="text" class="form-control" value="<?php echo $txtNombre?>"  name="txtNombre" id="txtNombre"  placeholder="Nombre del Pokemon">
+<input type="text" required class="form-control" value="<?php echo $txtNombre?>"  name="txtNombre" id="txtNombre"  placeholder="Nombre del Pokemon">
 </div>
 
 <div class = "form-group">
 <label for="Nombre">Tipo del Pokemon:</label>
-<input type="text" class="form-control" value="<?php echo $txtTipo?>"  name="txtTipo" id="txtTipo"  placeholder="Tipo del Pokemon">
+<input type="text" required class="form-control" value="<?php echo $txtTipo?>"  name="txtTipo" id="txtTipo"  placeholder="Tipo del Pokemon">
 </div>
 
 <div class = "form-group">
 <label for="txtNombre">Imagen del Pokemon:</label>
-<input type="file" class="form-control"value="<?php echo $txtImagen?>"  name="txtImagen" id="txtImagen" placeholder="foto del pokemon">
+<?php echo $txtImagen?>
+
+<?php
+if ($txtImagen!=""){ ?>
+
+            <img class="img-thumbnail rounded" src="../img/<?php echo $txtImagen;?> " width="50" alt="" srcset="">        
+
+<?php } ?>
+
+<input type="file" class="form-control" name="txtImagen" id="txtImagen" placeholder="nombre del pokemon">
 </div>
 
 <div class="btn-group" role="group" aria-label="">
-    <button type="submit" name="accion" value="Agregar" class="btn btn-success">Agregar</button>
-    <button type="submit" name="accion" value="Modificar" class="btn btn-warning">Modificar</button>
-    <button type="submit" name="accion" value="Cancelar" class="btn btn-info">Cancelar</button>
+    <button type="submit" name="accion"  <?php echo ($accion=="Seleccionar")?"disabled":""?>  value="Agregar" class="btn btn-success">Agregar</button>
+    <button type="submit" name="accion"  value="Modificar" class="btn btn-warning">Modificar</button>
+    <button type="submit" name="accion"  value="Cancelar" class="btn btn-info">Cancelar</button>
 </div>
 
 </form>
@@ -157,7 +175,8 @@ $listapokemon=$sentenciaSQL->fetchAll(PDO::FETCH_ASSOC);
 <table class="table table-bordered">
 <thead>
         <tr>
-            <th>Id</th>
+           <?php //<th>Id</th>?>
+            <th>N° Pokedex</th>
             <th>Nombre</th>
             <th>Tipo</th>
             <th>Imagen</th>
@@ -169,10 +188,13 @@ $listapokemon=$sentenciaSQL->fetchAll(PDO::FETCH_ASSOC);
 <?php foreach ($listapokemon as $pokemon) { ?>
 
     <tr>  
-            <td><?php echo $pokemon['id']; ?></td>
+            <?php //echo $pokemon['id']; ?>
+            <td><?php echo $pokemon['npokedex']; ?></td>
             <td><?php echo $pokemon['nombre']; ?></td>
             <td><?php echo $pokemon['tipo']; ?></td>
-            <td><?php echo $pokemon['imagen']; ?></td>
+            <td>              
+            <img class="img-thumbnail rounded" src="../img/<?php echo $pokemon['imagen']; ?>" width="100" alt="" srcset="">
+           </td>
 
             <td>
                 <form method="post">
