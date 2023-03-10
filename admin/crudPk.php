@@ -16,11 +16,91 @@ $txtImagen=(isset($_FILES['txtImagen']['name']))?$_FILES['txtImagen']['name']:""
 switch($accion)
 {
     case "Agregar":
-        $sentenciaSQL=$conexion->prepare("INSERT INTO pokemon(id,nombre,tipo,imagen) VALUES (NULL, 'Bulbasaur', 'planta', 'bulbasaur.jpg');");
-        $sentenciaSQL->execute();
+        $sentenciaSQL= $conexion->prepare("INSERT INTO pokemon (nombre, tipo, imagen) VALUES (:nombre,:tipo,:imagen);");
+        $sentenciaSQL->bindParam(':nombre', $txtNombre);
+        $sentenciaSQL->bindParam(':tipo', $txtTipo);
+        //$sentenciaSQL->bindParam(':imagen', $txtImagen);    
 
-    break;
 
+        $fecha=new DateTime();
+        $nombreArchivo=($txtImagen!="")?$fecha->getTimestamp()."_".$_FILES["txtImagen"]["name"]:"imagen.jpg";
+
+        $tmpImagen=$_FILES["txtImagen"]["tmp_name"];
+
+        if($tmpImagen!=""){
+
+            move_uploaded_file($tmpImagen,"../img/".$nombreArchivo);
+
+        }
+
+        $sentenciaSQL->bindParam(':imagen',$nombreArchivo);
+        $sentenciaSQL->execute();     
+        header("Location:crudPk.php");           
+        break;
+
+    case"Modificar":
+    
+        $sentenciaSQL=$conexion->prepare("UPDATE pokemon SET nombre=:nombre, tipo=:tipo WHERE id=:id");   
+        $sentenciaSQL->bindParam(':nombre',$txtNombre);
+        $sentenciaSQL->bindParam(':tipo',$txtTipo);
+        $sentenciaSQL->bindParam(':id',$txtID);
+        $sentenciaSQL->execute(); 
+
+        if($txtImagen!=""){
+        $fecha=new DateTime();
+        $nombreArchivo=($txtImagen!="")?$fecha->getTimestamp()."_".$_FILES["txtImagen"]["name"]:"imagen.jpg";
+        $tmpImagen=$_FILES["txtImagen"]["tmp_name"];
+
+        move_uploaded_file($tmpImagen,"../img/".$nombreArchivo);
+
+        $sentenciaSQL=$conexion->prepare("SELECT imagen FROM pokemon WHERE id=:id");   
+        
+        $sentenciaSQL->bindParam(':id',$txtID);
+        $sentenciaSQL->execute();  
+        $pokemon    =$sentenciaSQL->fetch(PDO::FETCH_LAZY); 
+
+        if(isset($libro["imagen"])&&($pokemon["imagen"]!="imagen.jpg")){
+
+            if(file_exists("../img/".$pokemon["imagen"])){
+
+                unlink("../img/".$pokemon["imagen"]);
+            }
+        }
+
+        $sentenciaSQL=$conexion->prepare("UPDATE pokemon SET imagen=:imagen WHERE id=:id");   
+        $sentenciaSQL->bindParam(':imagen',$nombreArchivo);
+        $sentenciaSQL->bindParam(':id',$txtID);
+        $sentenciaSQL->execute(); 
+        }
+        header("Location:crudPk.php");
+         break;
+
+    case"Cancelar":
+        
+        header("Location:crudPk.php");
+
+         break;
+
+    case"Seleccionar":
+
+        $sentenciaSQL=$conexion->prepare("SELECT * FROM pokemon WHERE id=:id");   
+        $sentenciaSQL->bindParam(':id',$txtID);
+        $sentenciaSQL->execute();  
+        $pokemon=$sentenciaSQL->fetch(PDO::FETCH_LAZY); 
+
+        $txtNombre=$pokemon ['nombre'];
+        $txtTipo=$pokemon ['tipo'];
+        $txtImagen=$pokemon ['imagen'];
+
+        break;
+
+    case"Borrar":        
+        $sentenciaSQL=$conexion->prepare("DELETE FROM pokemon WHERE id=:id");
+        $sentenciaSQL->bindParam(':id',$txtID);
+        $sentenciaSQL->execute();    
+        header("Location:crudPk.php");
+
+       break;
 
 }
 $sentenciaSQL=$conexion->prepare("SELECT * FROM pokemon");
@@ -41,22 +121,22 @@ $listapokemon=$sentenciaSQL->fetchAll(PDO::FETCH_ASSOC);
 
 <div class = "form-group">
 <label for="ID">ID:</label>
-<input type="text" required readonly class="form-control"   name="id" id="id"  placeholder="ID">
+<input type="text" required readonly class="form-control" value="<?php echo $txtID?>" name="txtID" id="txtID"  placeholder="ID">
 </div>
 
 <div class = "form-group">
-<label for="Nombre">Name Pokemon:</label>
-<input type="text" required class="form-control"name="name" id="name"  placeholder="Nombre del Pokemon">
+<label for="Nombre">Nombre del Pokemon:</label>
+<input type="text" class="form-control" value="<?php echo $txtNombre?>"  name="txtNombre" id="txtNombre"  placeholder="Nombre del Pokemon">
 </div>
 
 <div class = "form-group">
-<label for="Nombre">Type Pokemon:</label>
-<input type="text" required class="form-control"  name="type" id="type"  placeholder="Tipo del Pokemon">
+<label for="Nombre">Tipo del Pokemon:</label>
+<input type="text" class="form-control" value="<?php echo $txtTipo?>"  name="txtTipo" id="txtTipo"  placeholder="Tipo del Pokemon">
 </div>
 
 <div class = "form-group">
-<label for="txtNombre">Imagen:</label>
-<input type="file" class="form-control" value=" name="image_url" id="image_url" placeholder="foto del pokemon">
+<label for="txtNombre">Imagen del Pokemon:</label>
+<input type="file" class="form-control"value="<?php echo $txtImagen?>"  name="txtImagen" id="txtImagen" placeholder="foto del pokemon">
 </div>
 
 <div class="btn-group" role="group" aria-label="">
@@ -97,7 +177,7 @@ $listapokemon=$sentenciaSQL->fetchAll(PDO::FETCH_ASSOC);
             <td>
                 <form method="post">
 
-                <input type="hidden" name="txtID" id="" value="<?php echo $libro['id'];?>" />
+                <input type="hidden" name="txtID" id="" value="<?php echo $pokemon['id'];?>" />
 
                 <input type="submit" name="accion" value="Seleccionar" class="btn btn-primary"/>
 
