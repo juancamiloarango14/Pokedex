@@ -17,7 +17,7 @@ $txtImagen=(isset($_FILES['txtImagen']['name']))?$_FILES['txtImagen']['name']:""
 switch($accion)
 {
     case "Agregar":
-        $sentenciaSQL= $conexion->prepare("INSERT INTO pokemon (npokedex, nombre, tipo, imagen) VALUES (:npokedex, :nombre,:tipo,:imagen);");
+        $sentenciaSQL= $conexion->prepare("INSERT INTO pokemon (npokedex, nombre, tipo, imagen) VALUES (:npokedex, :nombre,:tipo,:imagen);");       
         $sentenciaSQL->bindParam(':npokedex', $txtNPokedex);
         $sentenciaSQL->bindParam(':nombre', $txtNombre);
         $sentenciaSQL->bindParam(':tipo', $txtTipo);
@@ -40,43 +40,51 @@ switch($accion)
         header("Location:crudPk.php");           
         break;
 
-    case"Modificar":
-    
-        $sentenciaSQL=$conexion->prepare("UPDATE pokemon SET npokedex=:npokedex, nombre=:nombre, tipo=:tipo WHERE id=:id");
-        $sentenciaSQL->bindParam(':npokedex', $txtNPokedex);   
-        $sentenciaSQL->bindParam(':nombre',$txtNombre);
-        $sentenciaSQL->bindParam(':tipo',$txtTipo);
+    case"Modificar":    
+
+        $sentenciaSQL=$conexion->prepare("UPDATE pokemon SET npokedex=:npokedex WHERE id=:id");
+        $sentenciaSQL->bindParam(':npokedex', $txtNPokedex);
+        $sentenciaSQL->bindParam(':id',$txtID);
+        $sentenciaSQL->execute(); 
+
+        $sentenciaSQL=$conexion->prepare("UPDATE pokemon SET nombre=:nombre WHERE id=:id");
+        $sentenciaSQL->bindParam(':nombre', $txtNombre);
+        $sentenciaSQL->bindParam(':id',$txtID);
+        $sentenciaSQL->execute(); 
+
+        $sentenciaSQL=$conexion->prepare("UPDATE pokemon SET tipo=:tipo WHERE id=:id");
+        $sentenciaSQL->bindParam(':tipo', $txtTipo);
         $sentenciaSQL->bindParam(':id',$txtID);
         $sentenciaSQL->execute(); 
 
         if($txtImagen!=""){
-        $fecha=new DateTime();
-        $nombreArchivo=($txtImagen!="")?$fecha->getTimestamp()."_".$_FILES["txtImagen"]["name"]:"imagen.jpg";
-        $tmpImagen=$_FILES["txtImagen"]["tmp_name"];
-
-        move_uploaded_file($tmpImagen,"../img/".$nombreArchivo);
-
-        $sentenciaSQL=$conexion->prepare("SELECT imagen FROM pokemon WHERE id=:id");   
-        
-        $sentenciaSQL->bindParam(':id',$txtID);
-        $sentenciaSQL->execute();  
-        $pokemon    =$sentenciaSQL->fetch(PDO::FETCH_LAZY); 
-
-        if(isset($libro["imagen"])&&($pokemon["imagen"]!="imagen.jpg")){
-
-            if(file_exists("../img/".$pokemon["imagen"])){
-
-                unlink("../img/".$pokemon["imagen"]);
+            $fecha=new DateTime();
+            $nombreArchivo=($txtImagen!="")?$fecha->getTimestamp()."_".$_FILES["txtImagen"]["name"]:"imagen.jpg";
+            $tmpImagen=$_FILES["txtImagen"]["tmp_name"];
+    
+            move_uploaded_file($tmpImagen,"../img/".$nombreArchivo);
+    
+            $sentenciaSQL=$conexion->prepare("SELECT imagen FROM pokemon WHERE id=:id");   
+            
+            $sentenciaSQL->bindParam(':id',$txtID);
+            $sentenciaSQL->execute();  
+            $libro=$sentenciaSQL->fetch(PDO::FETCH_LAZY); 
+    
+            if(isset($libro["imagen"])&&($libro["imagen"]!="imagen.jpg")){
+    
+                if(file_exists("../img/".$libro["imagen"])){
+    
+                    unlink("../img/".$libro["imagen"]);
+                }
             }
-        }
-
-        $sentenciaSQL=$conexion->prepare("UPDATE pokemon SET imagen=:imagen WHERE id=:id");   
-        $sentenciaSQL->bindParam(':imagen',$nombreArchivo);
-        $sentenciaSQL->bindParam(':id',$txtID);
-        $sentenciaSQL->execute(); 
-        }
-        header("Location:crudPk.php");
-         break;
+    
+            $sentenciaSQL=$conexion->prepare("UPDATE pokemon SET imagen=:imagen WHERE id=:id");   
+            $sentenciaSQL->bindParam(':imagen',$nombreArchivo);
+            $sentenciaSQL->bindParam(':id',$txtID);
+            $sentenciaSQL->execute(); 
+            }
+            header("Location:crudPk.php");
+             break;
 
     case"Cancelar":
         
@@ -123,29 +131,51 @@ $listapokemon=$sentenciaSQL->fetchAll(PDO::FETCH_ASSOC);
 <div class="card-body">
 <form method="POST" enctype="multipart/form-data">
 
-<!-- <div class = "form-group">
+ <div class = "form-group">
 <label for="ID">ID:</label>
 <input type="text" required readonly class="form-control" value="<?php echo $txtID?>" name="txtID" id="txtID"  placeholder="ID">
-</div> -->
+</div> 
 
 <div class = "form-group">
-<label for="Nombre">Numero en la pokedex:</label>
+<label for="npokedex">Numero en la pokedex:</label>
 <input type="text" required class="form-control" value="<?php echo $txtNPokedex?>"  name="txtNPokedex" id="txtNPokedex"  placeholder="Numero en la Pokedex">
 </div>
 
 <div class = "form-group">
-<label for="Nombre">Nombre del Pokemon:</label>
+<label for="nombre">Nombre del Pokemon:</label>
 <input type="text" required class="form-control" value="<?php echo $txtNombre?>"  name="txtNombre" id="txtNombre"  placeholder="Nombre del Pokemon">
 </div>
 
 <div class = "form-group">
-<label for="Nombre">Tipo del Pokemon:</label>
-<input type="text" required class="form-control" value="<?php echo $txtTipo?>"  name="txtTipo" id="txtTipo"  placeholder="Tipo del Pokemon">
+<label for="tipo" class="form-label mt-4">Tipo del Pokemon:</label>
+<select multiple="" class="form-control" value="<?php echo $txtTipo?>" name="txtTipo" id="txtTipo" placeholder="Tipo del Pokemon">
+<option>Bicho</option>
+<option>Dragón</option>
+<option>Eléctrico</option>
+<option>Hada</option>
+<option>Lucha</option>
+<option>Fuego</option>
+<option>Volador</option>
+<option>Fantasma</option>
+<option>Planta</option>
+<option>Tierra</option>
+<option>Hielo</option>
+<option>Normal</option>
+<option>Veneno</option>
+<option>Psíquico</option>
+<option>Roca</option>
+<option>Acero</option>
+<option>Agua</option>
+<option>Siniestro</option>
+
+</select>
+
 </div>
 
 <div class = "form-group">
 <label for="txtNombre">Imagen del Pokemon:</label>
 <?php echo $txtImagen?>
+
 
 <?php
 if ($txtImagen!=""){ ?>
@@ -175,7 +205,7 @@ if ($txtImagen!=""){ ?>
 <table class="table table-bordered">
 <thead>
         <tr>
-           <?php //<th>Id</th>?>
+            <th>Id</th>
             <th>N° Pokedex</th>
             <th>Nombre</th>
             <th>Tipo</th>
@@ -188,7 +218,7 @@ if ($txtImagen!=""){ ?>
 <?php foreach ($listapokemon as $pokemon) { ?>
 
     <tr>  
-            <?php //echo $pokemon['id']; ?>
+            <td><?php echo $pokemon['id']; ?></td>
             <td><?php echo $pokemon['npokedex']; ?></td>
             <td><?php echo $pokemon['nombre']; ?></td>
             <td><?php echo $pokemon['tipo']; ?></td>
