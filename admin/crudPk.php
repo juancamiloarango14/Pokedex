@@ -9,6 +9,7 @@ $txtNPokedex=(isset($_POST['txtNPokedex']))?$_POST['txtNPokedex']:"";
 $txtNombre=(isset($_POST['txtNombre']))?$_POST['txtNombre']:"";
 $txtTipo=(isset($_POST['txtTipo']))?$_POST['txtTipo']:"";
 $txtImagen=(isset($_FILES['txtImagen']['name']))?$_FILES['txtImagen']['name']:"";
+$txtDescripcion=(isset($_POST['txtDescripcion']))?$_POST['txtDescripcion']:"";
 
   $accion=(isset($_POST['accion']))?$_POST['accion']:"";
   $accion."<br/>";  
@@ -17,10 +18,11 @@ $txtImagen=(isset($_FILES['txtImagen']['name']))?$_FILES['txtImagen']['name']:""
 switch($accion)
 {
     case "Agregar":
-        $sentenciaSQL= $conexion->prepare("INSERT INTO pokemon (npokedex, nombre, tipo, imagen) VALUES (:npokedex, :nombre,:tipo,:imagen);");       
+        $sentenciaSQL= $conexion->prepare("INSERT INTO pokemon (npokedex, nombre, tipo, imagen, descripcion) VALUES (:npokedex, :nombre,:tipo,:imagen, :descripcion);");       
         $sentenciaSQL->bindParam(':npokedex', $txtNPokedex);
         $sentenciaSQL->bindParam(':nombre', $txtNombre);
         $sentenciaSQL->bindParam(':tipo', $txtTipo);
+        $sentenciaSQL->bindParam(':descripcion', $txtDescripcion);
         //$sentenciaSQL->bindParam(':imagen', $txtImagen);    
 
 
@@ -54,6 +56,11 @@ switch($accion)
 
         $sentenciaSQL=$conexion->prepare("UPDATE pokemon SET tipo=:tipo WHERE id=:id");
         $sentenciaSQL->bindParam(':tipo', $txtTipo);
+        $sentenciaSQL->bindParam(':id',$txtID);
+        $sentenciaSQL->execute(); 
+
+        $sentenciaSQL=$conexion->prepare("UPDATE pokemon SET descripcion=:descripcion WHERE id=:id");
+        $sentenciaSQL->bindParam(':descripcion', $txtDescripcion);
         $sentenciaSQL->bindParam(':id',$txtID);
         $sentenciaSQL->execute(); 
 
@@ -103,6 +110,7 @@ switch($accion)
         $txtNombre=$pokemon ['nombre'];
         $txtTipo=$pokemon ['tipo'];
         $txtImagen=$pokemon ['imagen'];
+        $txtDescripcion=$pokemon ['descripcion'];
 
         break;
 
@@ -184,6 +192,11 @@ if ($txtImagen!=""){ ?>
 
 <?php } ?>
 
+<div class = "form-group">
+<label for="nombre">Descripcion del Pokemon:</label>
+<textarea type="text" required class="form-control" value="<?php echo $txtDescripcion?>"  name="txtDescripcion" id="txtDescripcion"  placeholder="Descripcion del pokemon: "></textarea>
+</div>
+
 <input type="file" class="form-control" name="txtImagen" id="txtImagen" placeholder="nombre del pokemon">
 </div>
 
@@ -192,6 +205,7 @@ if ($txtImagen!=""){ ?>
     <button type="submit" name="accion"  value="Modificar" class="btn btn-warning">Modificar</button>
     <button type="submit" name="accion"  value="Cancelar" class="btn btn-info">Cancelar</button>
 </div>
+
 
 </form>
 </div>
@@ -210,6 +224,7 @@ if ($txtImagen!=""){ ?>
             <th>Nombre</th>
             <th>Tipo</th>
             <th>Imagen</th>
+            <th>Descripcion</th>
             <th>Acciones</th>
         </tr>
 </thead>
@@ -225,6 +240,7 @@ if ($txtImagen!=""){ ?>
             <td>              
             <img class="img-thumbnail rounded" src="../img/<?php echo $pokemon['imagen']; ?>" width="100" alt="" srcset="">
            </td>
+            <td><?php echo $pokemon['descripcion']; ?></td>
 
             <td>
                 <form method="post">
@@ -238,6 +254,7 @@ if ($txtImagen!=""){ ?>
                 </form>
             
             </td>
+
 
 
         </tr>
