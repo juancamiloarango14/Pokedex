@@ -18,11 +18,11 @@
         </li>
 
         <li class="nav-item">
-            <a class="nav-link" href="#">Inicio</a>
+            <a class="nav-link" href="registropk.php">Inicio</a>
         </li>
 
         <li class="nav-item">
-            <a class="nav-link" href="#">Registro de Pokemon</a>
+            <a class="nav-link" href="admin/crudPk.php">Registro de Pokemon</a>
         </li>
 
         <li class="nav-item">
