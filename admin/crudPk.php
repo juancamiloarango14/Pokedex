@@ -193,11 +193,15 @@ if ($txtImagen!=""){ ?>
 <?php } ?>
 
 <div class = "form-group">
-<label for="nombre">Descripcion del Pokemon:</label>
-<textarea type="text" required class="form-control" value="<?php echo $txtDescripcion?>"  name="txtDescripcion" id="txtDescripcion"  placeholder="Descripcion del pokemon: "></textarea>
+<input type="file" class="form-control" name="txtImagen" id="txtImagen" placeholder="nombre del pokemon">
 </div>
 
-<input type="file" class="form-control" name="txtImagen" id="txtImagen" placeholder="nombre del pokemon">
+<div class = "form-group">
+<label for="nombre">Descripcion del Pokemon:</label>
+<textarea type="text" class="form-control" value="<?php echo $txtDescripcion?>"  name="txtDescripcion" id="txtDescripcion"  placeholder="Descripcion del pokemon: "></textarea>
+</div>
+
+
 </div>
 
 <div class="btn-group" role="group" aria-label="">
